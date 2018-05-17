@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<security>
+	<!-- 以下URL不会拦截 -->
+	<exclude-url>/common/error/*.jsp</exclude-url>
+	<!-- 以下后缀的URL会拦截 -->
+	<include-ext>action,shtml,do</include-ext>
+
+	<!-- 规则列表 -->
+	<rule id="xss_script" flag="((&lt;|%3C)|(&gt;|%3E)|(script)|(alert)|(http)|(java|apache|class|/etc)|(%250a|%0d|%0a|%3A|%3C|%2F|%3E))" encoding="" desc="跨站脚本注入规则">
+		<regex id="xss_script.1" value="((&lt;|%3C)script[^&gt;]*(&gt;|%3E)).*((&lt;|%3C)(%2F|/)script[^&gt;]*(&gt;|%3E))" desc="对脚本块过滤" />
+		<regex id="xss_script.2" value="((&lt;|%3C)[^&gt;]*)(&amp;#|\\\\00)([^&gt;]*(&gt;|%3E))" desc="针对HEX字符的过滤。" />
+		<regex id="xss_script.3" value="((&lt;|%3C)[^&gt;]*style(%3D|=).*)((%2F|/)(%2A|\\*).*(%2A|\\*)(%2F|/))([^&gt;]*(&gt;|%3E))" desc="通过样式注释注入脚本" />
+		<regex id="xss_script.4" value="((&lt;|%3C)[^&gt;]*style(%3D|=)[^&gt;]+)(expression|javascript|vbscript|-moz-binding)([^&gt;]*(&gt;|%3E))" desc="通过Style注入脚本" />
+		<regex id="xss_script.5" value="((&lt;|%3C)style[^&gt;]*(&gt;|%3E).*)((%2F|/)(%2A|\\*).*(%2A|\\*)(%2F|/))(.*(&lt;|%3C)(%2F|/)style[^&gt;]*(&gt;|%3E))" desc="通过Style注入脚本" />
+		<regex id="xss_script.6" value="((&lt;|%3C)style[^&gt;]*(&gt;|%3E)[^&gt;]+)(expression|javascript|vbscript|-moz-binding)(.*(&lt;|%3C)(%2F|/)style[^&gt;]*(&gt;|%3E))" desc="通过样式注入脚本。" />
+		<regex id="xss_script.7" value="(&lt;|%3C)\s*(?:script)([^&gt;]*(&gt;|%3E))?" desc="注入脚本语句" />
+		<regex id="xss_script.8" value="((&lt;|%3C)[^&gt;]*src(%3D|=)[^&gt;]*(&gt;|%3E))" desc="img/iframe等src属性元素过滤。"/>
+		<regex id="xss_script.9" value="((&lt;|%3C)\s[^&gt;]*)?([\s\S])(a|A)(\s|%20|/)(h|H)(r|R)(e|E)(f|F)=" desc="a、link、href等元素过滤。"/>
+		<regex id="xss_script.10" value="(%250aHTTP|%0aContent- Length|%250aContent-Length%3A|%3Chtml|%2Fhtml%3E)" desc="对HTTP响应拆分过滤"/>
+	</rule>
+
+	<rule id="xss_event" flag="((&lt;|%3C)|(&gt;|%3E))" desc="事件脚本注入规则">
+		<regex id="xss_event.1" value="((&lt;|%3C)[^&gt;]*)(onmouse(over|out|down|up|move))([^&gt;]*(&gt;|%3E))" desc="鼠标事件" />
+		<regex id="xss_event.2" value="((&lt;|%3C)[^&gt;]*)(onkey(press|down|up))([^&gt;]*(&gt;|%3E))" desc="键盘事件" />
+		<regex id="xss_event.3" value="((&lt;|%3C)[^&gt;]*)(onclick|ondblclick|ondragstart|onerrorupdate|onhelp)([^&gt;]*(&gt;|%3E))" desc="其它事件" />
+		<regex id="xss_event.4" value="((&lt;|%3C)[^&gt;]*)(onrowexit|onselectstart|onload|onunload|onbeforeunload)([^&gt;]*(&gt;|%3E))" desc="其它事件" />
+		<regex id="xss_event.5" value="((&lt;|%3C)[^&gt;]*)(onreadystatechange|onrowenter|oncontextmenu)([^&gt;]*(&gt;|%3E))" desc="其它事件" />
+		<regex id="xss_event.6" value="((&lt;|%3C)[^&gt;]*)(onblur|onerror|onfocus|onresize|onscroll)([^&gt;]*(&gt;|%3E))" desc="其它事件" />
+	</rule>
+
+	<rule id="xss_sql" flag="( |%20|%27|select|insert|update|drop|delete|where)" desc="SQL注入规则">
+		<regex id="xss_sql.1" value="(insert|select|delete|update|drop)( |%20)+[ \\w]*(into|from|set)" desc="SQL注入规则" />
+		<regex id="xss_sql.2" value="(count|chr|mid|master|truncate|char|declare)(\\([^\)]*\\))" desc="SQL注入规则" />
+		<regex id="xss_sql.3" value="(((%3D)|(=))[^\n]*)((%27)|(\')[^\n]*)((\\-\\-)|(%3B)|(;))( |%20)*(\'|%27)" desc="SQL注入规则特殊字符" />
+		<regex id="xss_sql.4" value="( |%20)((%6F)|o|(%4F))((%72)|r|(%52))( |%20)" desc="SQL注入Or关键字" />
+		<regex id="xss_sql.5" value="( |%20)((%41)|a|(%61))((%4E)|n|(%6E))((%44)|d|(%64))( |%20)" desc="SQL注入And关键字" />
+		<regex id="xss_sql.6" value="(exec(\s|\+)+(s|x)p\w+)" desc="MS SQL Server SQL注入攻击" />
+	</rule>
+
+	<rule id="xss_crlf" desc="CRLF规则">
+		<regex id="xss_crlf.1" value="(((%0D|\r)(%0A|\n))|%00|(%0D|\r))" desc="回车换行字符过滤" />
+	</rule>
+
+	<rule id="xss_svn" desc=".svn目录隐藏">
+		<regex id="xss_svn.1" value="(//.svn|\.svn)" desc="隐藏URL中包含.svn目录"/>
+	</rule>
+
+	<rule id="host_white" desc="HOST验证" flag="true">
+		<regex id="host_white.1" value="127.0.0.1:7008" desc="HOST白名单列表"/>
+		<regex id="host_white.2" value="wapah.189.cn" desc="HOST白名单列表"/>
+	</rule>
+
+	<rule id="req_method" desc="请求方式过滤" flag="true">
+		<regex id="req_method.1" value="GET" desc="GET请求"/>
+		<regex id="req_method.2" value="POST" desc="POST请求"/>
+		<regex id="req_method.3" value="HEAD" desc="HEAD请求"/>
+	</rule>
+
+	<rule id="req_limit" desc="请求限制" flag="true">
+		<regex id="ip_limit" value="45" desc="同一个IP每分钟最多发起45次请求（静态资源除外）"/>
+		<regex id="post_length_limit" value="2048" desc="POST请求长度限制" flag="false"/>
+	</rule>
+</security>
