@@ -10,6 +10,7 @@ import java.util.List;
  * @Date: 2018/3/9 0017 14:29
  * @Description: 规则模型
  * @Version: 1.0
+ * 我就是来加个注释 骚年不要紧张 哈哈
  **/
 public class RuleConfig implements Serializable{
 
